@@ -21,7 +21,8 @@ class DBHelper {
   }
 
   _onCreate(Database db, int version) async {
-    await db.execute('CREATE TABLE user (id INTEGER PRIMARY KEY, username TEXT, password TEXT, phone TEXT, email TEXT, address TEXT)');
+    await db.execute(
+        'CREATE TABLE user (id INTEGER PRIMARY KEY, username TEXT, password TEXT, phone TEXT, email TEXT, address TEXT)');
   }
 
   Future<int> saveUser(User user) async {
@@ -30,7 +31,7 @@ class DBHelper {
   }
 
   //test read
-  Future<void> test_read(String db_name) async {
+  Future<List<User>> test_read(String db_name) async {
     // Get a location using getDatabasesPath
     var databasesPath = await getDatabasesPath();
     String path = pth.join(databasesPath, db_name);
@@ -40,9 +41,14 @@ class DBHelper {
 
     // Get the records for the table named user which we should have created above
     List<Map> list = await database.rawQuery('SELECT * FROM user');
-    print(list);
+    List<User> users = [];
+    if (list.length > 0) {
+      for (int i = 0; i < list.length; i++) {
+        users.add(User.fromMap(list[i]));
+      }
+    }
+    return users;
   }
-
 }
 
 class User {
@@ -53,7 +59,8 @@ class User {
   String email;
   String address;
 
-  User(this.id, this.username, this.password, this.phone, this.email, this.address);
+  User(this.id, this.username, this.password, this.phone, this.email,
+      this.address);
 
   Map<String, dynamic> toMap() {
     var map = <String, dynamic>{
@@ -65,5 +72,16 @@ class User {
       'address': address
     };
     return map;
+  }
+
+  factory User.fromMap(Map<dynamic, dynamic> map) {
+    return new User(
+      map['id'],
+      map['username'],
+      map['password'],
+      map['phone'],
+      map['email'],
+      map['address'],
+    );
   }
 }
